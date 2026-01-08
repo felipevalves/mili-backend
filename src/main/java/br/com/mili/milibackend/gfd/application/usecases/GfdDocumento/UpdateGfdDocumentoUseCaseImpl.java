@@ -54,10 +54,13 @@ public class UpdateGfdDocumentoUseCaseImpl implements UpdateGfdDocumentoUseCase 
         var gfdDocumentoSaved = gfdDocumentoRepository.save(gfdDocumento);
 
         var funcionarioId = gfdDocumentoSaved.getGfdFuncionario() != null ? gfdDocumentoSaved.getGfdFuncionario().getId() : null;
+        boolean isFuncionarioDesligado = gfdDocumentoSaved.getGfdFuncionario() != null
+                && gfdDocumentoSaved.getGfdFuncionario().getDesligado() != null
+                && gfdDocumentoSaved.getGfdFuncionario().getDesligado() == 1;
 
         criarHistorico(inputDto, gfdDocumentoSaved, gfdDocumento, funcionarioId);
 
-        liberarFuncionario(funcionarioId, gfdDocumentoSaved.getCtforCodigo());
+        liberarFuncionario(funcionarioId, gfdDocumentoSaved.getCtforCodigo(), isFuncionarioDesligado);
 
         return modelMapper.map(gfdDocumento, GfdDocumentoUpdateOutputDto.class);
     }
@@ -75,7 +78,7 @@ public class UpdateGfdDocumentoUseCaseImpl implements UpdateGfdDocumentoUseCase 
         gfdDocumentoHistoricoRepository.save(gfdDocumentoHistorico);
     }
 
-    private void liberarFuncionario(Integer funcionarioId, Integer ctforCodigo) {
+    private void liberarFuncionario(Integer funcionarioId, Integer ctforCodigo, boolean isFuncionarioDesligado) {
         LocalDate inicioMesAnterior = LocalDate.now()
                 .minusMonths(1)
                 .withDayOfMonth(1);
@@ -86,7 +89,7 @@ public class UpdateGfdDocumentoUseCaseImpl implements UpdateGfdDocumentoUseCase 
         // pesquisa todos os documentos do funcionario do mes anterior exemplo: estamos no mes 11 -> procurar mes 10
         // os documentos da empresa também precisam estar em conforme
         // se tudo tiver conforme automaticamente atualiza o liberado do funcionario
-        if (funcionarioId != null) {
+        if (funcionarioId != null && !isFuncionarioDesligado) {
             updateStatusLiberadoFuncionario(funcionarioId, inicioMesAnterior, documentosStatusFornecedor);
         }
     }
