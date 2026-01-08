@@ -48,10 +48,7 @@ class RelatorioGfdDocumentoUseCaseImplTest {
         var sent = captor.getValue();
         assertNotNull(sent);
         assertNotNull(sent.getParamQuery());
-        String where = sent.getParamQuery();
-        assertTrue(where.contains(" AND B.CTFOR_CODIGO = 321"), "Deve conter filtro de fornecedor");
-        assertTrue(where.contains(" AND A.ID_FUNCIONARIO = 99"), "Deve conter filtro de funcionario");
-        assertTrue(where.contains(" AND A.STATUS = 'CONFORME'"), "Deve conter filtro de status");
+        assertEquals(" AND CTFOR_CODIGO = 321 AND ID_FUNCIONARIO = 99 AND PERIODO_INICIAL >= TO_DATE('2025-09-01', 'YYYY-MM-DD')", sent.getParamQuery());
     }
 
     @Test
@@ -73,6 +70,6 @@ class RelatorioGfdDocumentoUseCaseImplTest {
         var sent = captor.getValue();
         assertNotNull(sent);
         assertNotNull(sent.getParamQuery());
-        assertEquals("", sent.getParamQuery());
+        assertEquals(" AND PERIODO_INICIAL >= TO_DATE('2025-09-01', 'YYYY-MM-DD')", sent.getParamQuery());
     }
 }
