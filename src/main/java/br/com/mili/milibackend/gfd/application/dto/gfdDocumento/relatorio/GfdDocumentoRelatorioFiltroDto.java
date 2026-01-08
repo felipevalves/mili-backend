@@ -13,5 +13,7 @@ import lombok.NoArgsConstructor;
 public class GfdDocumentoRelatorioFiltroDto {
     private Integer funcionarioId;
     private Integer ctforCodigo;
+    private String razaoSocial;
+    private String cnpj;
     private GfdDocumentoStatusEnum status;
 }

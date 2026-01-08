@@ -20,16 +20,22 @@ public class RelatorioGfdDocumentoUseCaseImpl implements RelatorioGfdDocumentoUs
         StringBuilder where = new StringBuilder();
 
         if (filtro.getCtforCodigo() != null) {
-            where.append(" AND B.CTFOR_CODIGO = ").append(filtro.getCtforCodigo());
+            where.append(" AND CTFOR_CODIGO = ").append(filtro.getCtforCodigo());
+        }
+
+        if(filtro.getRazaoSocial() != null) {
+            where.append(" AND RAZAO_SOCIAL LIKE '%").append(filtro.getRazaoSocial().toUpperCase()).append("%'");
+        }
+
+        if(filtro.getCnpj() != null) {
+            where.append(" AND CTFOR_CGCCPF = '").append(filtro.getCnpj()).append("'");
         }
 
         if (filtro.getFuncionarioId() != null) {
-            where.append(" AND A.ID_FUNCIONARIO = ").append(filtro.getFuncionarioId());
+            where.append(" AND ID_FUNCIONARIO = ").append(filtro.getFuncionarioId());
         }
 
-        if (filtro.getStatus() != null) {
-            where.append(" AND A.STATUS = '").append(filtro.getStatus().toJson()).append("'");
-        }
+        where.append(" AND PERIODO_INICIAL >= TO_DATE('2025-09-01', 'YYYY-MM-DD')");
 
         ReportGfdDocumentoRequestDto req = ReportGfdDocumentoRequestDto.builder()
                 .paramQuery(where.toString())
