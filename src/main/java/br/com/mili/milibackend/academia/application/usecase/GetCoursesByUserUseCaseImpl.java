@@ -19,11 +19,11 @@ public class GetCoursesByUserUseCaseImpl implements GetCoursesByUserUseCase {
     public AcademiaGetCourseByUserOutputDto getCourseByUser(int userId, int courseId) {
         List<AcademiaExternalGetCousesByIdResponse> courses = academiaExternalService.getCoursesByUser(userId, List.of(courseId));
 
-        if (courses == null || courses.isEmpty()) {
+        var course = courses.stream().filter(c -> c.getId() == courseId).findFirst().orElse(null);
+
+        if (course == null) {
             return null;
         }
-
-        var course = courses.get(0);
 
         return AcademiaGetCourseByUserOutputDto.builder()
                 .id(course.getId() != null ? course.getId() : null)

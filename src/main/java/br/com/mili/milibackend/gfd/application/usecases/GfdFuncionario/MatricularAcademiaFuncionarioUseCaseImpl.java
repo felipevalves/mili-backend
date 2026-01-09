@@ -39,6 +39,7 @@ public class MatricularAcademiaFuncionarioUseCaseImpl implements MatricularAcade
                         .filter(local ->
                                 local.equals(AcademiaIdCoursesEnum.TRES_BARRAS.getCtempCodigo())
                                         || local.equals(AcademiaIdCoursesEnum.CURITIBA_FAB.getCtempCodigo())
+                                        || local.equals(AcademiaIdCoursesEnum.CURITIBA_CD.getCtempCodigo())
                         )
                         .toList();
 

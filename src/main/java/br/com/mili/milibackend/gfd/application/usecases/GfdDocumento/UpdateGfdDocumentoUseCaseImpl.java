@@ -79,46 +79,13 @@ public class UpdateGfdDocumentoUseCaseImpl implements UpdateGfdDocumentoUseCase 
     }
 
     private void liberarFuncionario(Integer funcionarioId, Integer ctforCodigo, boolean isFuncionarioDesligado) {
-        LocalDate inicioMesAnterior = LocalDate.now()
-                .minusMonths(1)
-                .withDayOfMonth(1);
-
-        var documentosStatusFornecedor = gfdDocumentoRepository.getAllCount(ctforCodigo, inicioMesAnterior);
 
         // se o documento for de um funcionario
         // pesquisa todos os documentos do funcionario do mes anterior exemplo: estamos no mes 11 -> procurar mes 10
         // os documentos da empresa também precisam estar em conforme
         // se tudo tiver conforme automaticamente atualiza o liberado do funcionario
         if (funcionarioId != null && !isFuncionarioDesligado) {
-            updateStatusLiberadoFuncionario(funcionarioId, inicioMesAnterior, documentosStatusFornecedor);
-        }
-    }
-
-
-    private void updateStatusLiberadoFuncionario(Integer funcionarioId, LocalDate inicioMesAnterior, GfdDocumentCountProjection documentosStatusFornecedor) {
-        var documentosStatus = gfdFuncionarioRepository.getAllDocuments(funcionarioId, inicioMesAnterior);
-
-        var naoEnviado = documentosStatusFornecedor.getNaoEnviado() + documentosStatus.getNaoEnviado();
-        var totalEnviado = documentosStatusFornecedor.getTotalEnviado() + documentosStatus.getTotalEnviado();
-        var totalEmAnalise = documentosStatusFornecedor.getTotalEmAnalise() + documentosStatus.getTotalEmAnalise();
-        var totalNaoConforme = documentosStatusFornecedor.getTotalNaoConforme() + documentosStatus.getTotalNaoConforme();
-
-        if (naoEnviado == 0
-                && totalEnviado == 0
-                && totalEmAnalise == 0
-                && totalNaoConforme == 0
-        ) {
-            gfdFuncionarioRepository.updateLiberado(funcionarioId, 1);
-
-            var gfdFuncionarioLiberacao = GfdFuncionarioLiberacao.builder()
-                    .funcionarioId(funcionarioId)
-                    .data(LocalDateTime.now())
-                    .statusLiberado(1)
-                    .justificativa("ATUALIZAÇÃO AUTOMÁTICA")
-                    .usuarioCodigo(2)
-                    .build();
-
-            gfdFuncionarioLiberacaoRepository.save(gfdFuncionarioLiberacao);
+            gfdFuncionarioRepository.executeProcedureLiberacao(funcionarioId);
         }
     }
 

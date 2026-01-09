@@ -7,6 +7,7 @@ import br.com.mili.milibackend.gfd.infra.projections.GfdDocumentCountProjection;
 import br.com.mili.milibackend.gfd.infra.projections.GfdFuncionarioDocumentsProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -77,5 +78,7 @@ public interface GfdDocumentoRepository extends JpaRepository<GfdDocumento, Inte
             Integer ctforCodigo,
             LocalDate periodo
     );
+
+
 
 }

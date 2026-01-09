@@ -220,4 +220,13 @@ public interface GfdFuncionarioRepository extends JpaRepository<GfdFuncionario, 
     void alterarIdAcademia(@Param("id") Integer id, @Param("idAcademia") Integer idAcademia);
 
     boolean existsByEmail(String email);
+
+
+    @Modifying
+    @Query(value = """
+    BEGIN
+        PKG_GFD_EXPIRACAO.GFD_PROCESSAR_EXPIRACAO(FALSE, :idFuncionario);
+    END;
+""", nativeQuery = true)
+    void executeProcedureLiberacao(Integer idFuncionario);
 }
