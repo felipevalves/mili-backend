@@ -89,29 +89,11 @@ class UpdateGfdDocumentoUseCaseImplTest {
         when(gfdDocumentoRepository.findById(documentoId)).thenReturn(Optional.of(entidade));
         when(gfdDocumentoRepository.save(any(GfdDocumento.class))).thenReturn(entidade);
 
-        GfdDocumentCountProjection fornecedorProj = mock(GfdDocumentCountProjection.class);
-        when(fornecedorProj.getNaoEnviado()).thenReturn(0);
-        when(fornecedorProj.getTotalEnviado()).thenReturn(0);
-        when(fornecedorProj.getTotalEmAnalise()).thenReturn(0);
-        when(fornecedorProj.getTotalNaoConforme()).thenReturn(0);
-        when(gfdDocumentoRepository.getAllCount(eq(ctforCodigo), any(LocalDate.class))).thenReturn(fornecedorProj);
-
-        GfdFuncionarioDocumentsProjection funcProj = mock(GfdFuncionarioDocumentsProjection.class);
-        when(funcProj.getNaoEnviado()).thenReturn(0);
-        when(funcProj.getTotalEnviado()).thenReturn(0);
-        when(funcProj.getTotalEmAnalise()).thenReturn(0);
-        when(funcProj.getTotalNaoConforme()).thenReturn(0);
-        when(gfdFuncionarioRepository.getAllDocuments(eq(funcionarioId), any(LocalDate.class))).thenReturn(funcProj);
-
         // act
         useCase.execute(input);
 
         // assert: sem pendencias => libera funcionario (1)
-        verify(gfdFuncionarioRepository).updateLiberado(funcionarioId, 1);
-        // e nao mexe no fornecedor
-        verify(gfdFuncionarioRepository, never()).updateLiberadoFornecedor(anyInt(), anyInt());
-        // historico salvo
-        verify(gfdDocumentoHistoricoRepository).save(any());
+        verify(gfdFuncionarioRepository).executeProcedureLiberacao(funcionarioId);
     }
 
 /*    @Test

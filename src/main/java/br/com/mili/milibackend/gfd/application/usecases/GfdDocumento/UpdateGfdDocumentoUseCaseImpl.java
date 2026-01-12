@@ -54,10 +54,13 @@ public class UpdateGfdDocumentoUseCaseImpl implements UpdateGfdDocumentoUseCase 
         var gfdDocumentoSaved = gfdDocumentoRepository.save(gfdDocumento);
 
         var funcionarioId = gfdDocumentoSaved.getGfdFuncionario() != null ? gfdDocumentoSaved.getGfdFuncionario().getId() : null;
+        boolean isFuncionarioDesligado = gfdDocumentoSaved.getGfdFuncionario() != null
+                && gfdDocumentoSaved.getGfdFuncionario().getDesligado() != null
+                && gfdDocumentoSaved.getGfdFuncionario().getDesligado() == 1;
 
         criarHistorico(inputDto, gfdDocumentoSaved, gfdDocumento, funcionarioId);
 
-        liberarFuncionario(funcionarioId, gfdDocumentoSaved.getCtforCodigo());
+        liberarFuncionario(funcionarioId, gfdDocumentoSaved.getCtforCodigo(), isFuncionarioDesligado);
 
         return modelMapper.map(gfdDocumento, GfdDocumentoUpdateOutputDto.class);
     }
@@ -75,47 +78,14 @@ public class UpdateGfdDocumentoUseCaseImpl implements UpdateGfdDocumentoUseCase 
         gfdDocumentoHistoricoRepository.save(gfdDocumentoHistorico);
     }
 
-    private void liberarFuncionario(Integer funcionarioId, Integer ctforCodigo) {
-        LocalDate inicioMesAnterior = LocalDate.now()
-                .minusMonths(1)
-                .withDayOfMonth(1);
-
-        var documentosStatusFornecedor = gfdDocumentoRepository.getAllCount(ctforCodigo, inicioMesAnterior);
+    private void liberarFuncionario(Integer funcionarioId, Integer ctforCodigo, boolean isFuncionarioDesligado) {
 
         // se o documento for de um funcionario
         // pesquisa todos os documentos do funcionario do mes anterior exemplo: estamos no mes 11 -> procurar mes 10
         // os documentos da empresa também precisam estar em conforme
         // se tudo tiver conforme automaticamente atualiza o liberado do funcionario
-        if (funcionarioId != null) {
-            updateStatusLiberadoFuncionario(funcionarioId, inicioMesAnterior, documentosStatusFornecedor);
-        }
-    }
-
-
-    private void updateStatusLiberadoFuncionario(Integer funcionarioId, LocalDate inicioMesAnterior, GfdDocumentCountProjection documentosStatusFornecedor) {
-        var documentosStatus = gfdFuncionarioRepository.getAllDocuments(funcionarioId, inicioMesAnterior);
-
-        var naoEnviado = documentosStatusFornecedor.getNaoEnviado() + documentosStatus.getNaoEnviado();
-        var totalEnviado = documentosStatusFornecedor.getTotalEnviado() + documentosStatus.getTotalEnviado();
-        var totalEmAnalise = documentosStatusFornecedor.getTotalEmAnalise() + documentosStatus.getTotalEmAnalise();
-        var totalNaoConforme = documentosStatusFornecedor.getTotalNaoConforme() + documentosStatus.getTotalNaoConforme();
-
-        if (naoEnviado == 0
-                && totalEnviado == 0
-                && totalEmAnalise == 0
-                && totalNaoConforme == 0
-        ) {
-            gfdFuncionarioRepository.updateLiberado(funcionarioId, 1);
-
-            var gfdFuncionarioLiberacao = GfdFuncionarioLiberacao.builder()
-                    .funcionarioId(funcionarioId)
-                    .data(LocalDateTime.now())
-                    .statusLiberado(1)
-                    .justificativa("ATUALIZAÇÃO AUTOMÁTICA")
-                    .usuarioCodigo(2)
-                    .build();
-
-            gfdFuncionarioLiberacaoRepository.save(gfdFuncionarioLiberacao);
+        if (funcionarioId != null && !isFuncionarioDesligado) {
+            gfdFuncionarioRepository.executeProcedureLiberacao(funcionarioId);
         }
     }
 

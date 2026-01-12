@@ -7,6 +7,7 @@ import java.util.Optional;
 @Getter
 public enum AcademiaIdCoursesEnum {
     TRES_BARRAS(2519, 2),
+    CURITIBA_CD(2952, 4),
     CURITIBA_FAB(2614, 1);
 
     private int idCourse;

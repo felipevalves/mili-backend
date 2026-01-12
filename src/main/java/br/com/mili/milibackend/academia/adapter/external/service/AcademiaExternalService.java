@@ -161,17 +161,19 @@ public class AcademiaExternalService {
                 .append(userId)
                 .append("/courses");
 
+        /*
+        O wordpress n esta respeitando o include, achando cursos q o usuário não tem
         Map<String, String> include = new HashMap<>();
 
         if (courseIds != null && !courseIds.isEmpty()) {
             include.put("include", courseIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
         }
+        */
 
         return webClientWithLog()
                 .method(HttpMethod.GET)
                 .uri(ldApi(uriBuilder.toString()))
                 .headers(h -> h.setBasicAuth(wpUser, wpAppPassword))
-                .bodyValue(include)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, resp ->
                         resp.bodyToMono(String.class)
