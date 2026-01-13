@@ -68,16 +68,6 @@ public interface GfdFuncionarioRepository extends JpaRepository<GfdFuncionario, 
                   AND C.ID_TIPO_DOCUMENTO = B.ID
                   AND C.ID_FUNCIONARIO = A.ID_FUNCIONARIO
 
-               RIGHT JOIN (
-                   SELECT
-                       MAX(L.CTEMP_CODIGO) AS CTEMP_CODIGO,
-                       L.ID_FUNCIONARIO
-                   FROM GFD_LOCAL_TRABALHO L
-                   WHERE (:idsLocalTrabalho IS NULL OR L.CTEMP_CODIGO IN (:idsLocalTrabalho))
-                   GROUP BY L.ID_FUNCIONARIO
-               ) LT
-                   ON LT.ID_FUNCIONARIO = A.ID_FUNCIONARIO
-
                WHERE (:idFuncionario IS NULL OR A.ID_FUNCIONARIO = :idFuncionario)
                  AND (:nome IS NULL OR LOWER(A.NOME) LIKE LOWER(:nome))
                  AND A.ATIVO = :ativo
@@ -90,6 +80,15 @@ public interface GfdFuncionarioRepository extends JpaRepository<GfdFuncionario, 
                     OR (:periodoInicio IS NOT NULL AND :periodoFim IS NULL AND A.PERIODO_INICIAL >= :periodoInicio)
                     OR (:periodoInicio IS NULL AND :periodoFim IS NOT NULL AND A.PERIODO_INICIAL <= :periodoFim)
                  )
+               AND (
+                :idsLocalTrabalho IS NULL
+                OR EXISTS (
+                    SELECT 1
+                    FROM GFD_LOCAL_TRABALHO L
+                    WHERE L.ID_FUNCIONARIO = A.ID_FUNCIONARIO
+                      AND L.CTEMP_CODIGO IN (:idsLocalTrabalho)
+                )
+               )
 
                GROUP BY
                    A.ATIVO,
