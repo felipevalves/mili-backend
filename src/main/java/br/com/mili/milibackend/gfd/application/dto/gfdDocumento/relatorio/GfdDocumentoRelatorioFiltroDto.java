@@ -16,4 +16,5 @@ public class GfdDocumentoRelatorioFiltroDto {
     private String razaoSocial;
     private String cnpj;
     private GfdDocumentoStatusEnum status;
+    private Integer idLocalTrabalho;
 }
