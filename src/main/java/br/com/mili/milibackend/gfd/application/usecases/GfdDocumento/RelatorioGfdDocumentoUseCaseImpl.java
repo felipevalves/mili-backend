@@ -35,6 +35,11 @@ public class RelatorioGfdDocumentoUseCaseImpl implements RelatorioGfdDocumentoUs
             where.append(" AND ID_FUNCIONARIO = ").append(filtro.getFuncionarioId());
         }
 
+        if(filtro.getIdLocalTrabalho() != null) {
+            where.append(" AND CTEMP_CODIGO = ").append(filtro.getIdLocalTrabalho());
+        }
+
+
         where.append(" AND PERIODO_INICIAL >= TO_DATE('2025-09-01', 'YYYY-MM-DD')");
 
         ReportGfdDocumentoRequestDto req = ReportGfdDocumentoRequestDto.builder()
