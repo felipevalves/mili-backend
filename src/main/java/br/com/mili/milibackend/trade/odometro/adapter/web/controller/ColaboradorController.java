@@ -14,8 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import static br.com.mili.milibackend.shared.roles.GfdRolesConstants.*;
-import static br.com.mili.milibackend.shared.roles.GfdRolesConstants.ROLE_SESMT;
 import static br.com.mili.milibackend.shared.roles.TradeRolesConstants.ROLE_ODOMETRO;
 
 @Slf4j

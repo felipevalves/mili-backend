@@ -9,13 +9,17 @@ import br.com.mili.milibackend.gfd.application.policy.IGfdPolicy;
 import br.com.mili.milibackend.gfd.domain.interfaces.IGfdManagerService;
 import br.com.mili.milibackend.gfd.domain.usecases.gfdManager.VerifyFornecedorUseCase;
 import br.com.mili.milibackend.shared.infra.security.model.CustomUserPrincipal;
+import br.com.mili.milibackend.shared.logoperation.LogOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import static br.com.mili.milibackend.shared.roles.GfdRolesConstants.*;
+import static br.com.mili.milibackend.gfd.shared.roles.GfdPermissions.Geral.*;
 
 /**
  * Controller para gerenciar os endpoints de GFD
@@ -23,11 +27,6 @@ import static br.com.mili.milibackend.shared.roles.GfdRolesConstants.*;
 @Slf4j
 @RestController
 @RequestMapping(GfdMController.ENDPOINT)
-@PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-              "or hasAuthority('" + ROLE_FORNECEDOR + "')" +
-              "or hasAuthority('" + ROLE_VISUALIZACAO + "')" +
-              "or hasAuthority('" + ROLE_SESMT + "')"
-)
 public class GfdMController {
     protected static final String ENDPOINT = "/mili-backend/v1/gfd";
 
@@ -41,13 +40,18 @@ public class GfdMController {
         this.verifyFornecedorUseCase = verifyFornecedorUseCase;
     }
 
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + FORNECEDOR + "')" +
+            "or hasAuthority('" + PORTARIA + "')" +
+            "or hasAuthority('" + FABRICA + "')" +
+            "or hasAuthority('" + SESMT + "')"
+    )
+    @LogOperation
     @GetMapping("verificar-fornecedor")
     public ResponseEntity<GfdMVerificarFornecedorOutputDto> verificarFornecedor(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @RequestParam(value = "id", required = false) Integer fornecedorId
     ) {
-        log.info("{} {} {}", RequestMethod.GET, ENDPOINT + "/verificar-fornecedor", user.getUsername());
-
         var inputDto = new GfdMVerificarFornecedorInputDto();
         inputDto.setCodUsuario(user.getIdUser());
         inputDto.setId(fornecedorId);
@@ -61,12 +65,18 @@ public class GfdMController {
         return ResponseEntity.ok(verifyFornecedorUseCase.execute(inputDto));
     }
 
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + FORNECEDOR + "')" +
+            "or hasAuthority('" + PORTARIA + "')" +
+            "or hasAuthority('" + FABRICA + "')" +
+            "or hasAuthority('" + SESMT + "')"
+    )
     @GetMapping("fornecedores")
+    @LogOperation
     public ResponseEntity<GfdMFornecedorGetOutputDto> recuperarFornecedor(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @RequestParam(value = "id", required = false) Integer fornecedorId
     ) {
-        log.info("{} {} {}", RequestMethod.GET, ENDPOINT + "/fornecedores", user.getUsername());
 
         var inputDto = new GfdMFornecedorGetInputDto();
 

@@ -7,7 +7,9 @@ import br.com.mili.milibackend.fornecedor.application.dto.FornecedorMeusDadosUpd
 import br.com.mili.milibackend.fornecedor.application.service.FornecedorService;
 import br.com.mili.milibackend.fornecedor.domain.interfaces.service.IFornecedorService;
 import br.com.mili.milibackend.gfd.application.policy.GfdPolicy;
+import br.com.mili.milibackend.gfd.shared.roles.GfdPermissions;
 import br.com.mili.milibackend.shared.infra.security.model.CustomUserPrincipal;
+import br.com.mili.milibackend.shared.logoperation.LogOperation;
 import br.com.mili.milibackend.shared.page.pagination.MyPage;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +19,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import static br.com.mili.milibackend.shared.roles.GfdRolesConstants.*;
+import static br.com.mili.milibackend.gfd.shared.roles.GfdGeralRole.VISUALIZACAO;
+import static br.com.mili.milibackend.gfd.shared.roles.GfdPermissions.Geral.*;
+
 
 @Slf4j
 @RestController
@@ -33,10 +37,12 @@ public class FornecedorController {
         this.gfdPolicy = gfdPolicy;
     }
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-                  "or hasAuthority('" + ROLE_FORNECEDOR + "') " +
-                  "or hasAuthority('" + ROLE_SESMT + "')")
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + FORNECEDOR + "') " +
+            "or hasAuthority('" + SESMT + "')"
+    )
     @PutMapping
+    @LogOperation
     public ResponseEntity<FornecedorMeusDadosUpdateOutputDto> updateMeusDados(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @RequestBody @Valid FornecedorMeusDadosUpdateInputDto inputDto
@@ -57,13 +63,12 @@ public class FornecedorController {
     }
 
 
-    /// @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') or hasAuthority('" + ROLE_FORNECEDOR + "')")
     @GetMapping
+    @LogOperation
     public ResponseEntity<MyPage<FornecedorGetAllOutputDto>> getAll(
             @ParameterObject @ModelAttribute FornecedorGetAllInputDto inputDto,
             @AuthenticationPrincipal CustomUserPrincipal user
     ) {
-        log.info("{} {}/{}", RequestMethod.GET, ENDPOINT, user.getUsername());
 
         var fornecedor = fornecedorService.getAll(inputDto);
 

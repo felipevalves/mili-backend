@@ -10,7 +10,9 @@ import br.com.mili.milibackend.gfd.application.dto.manager.funcionario.*;
 import br.com.mili.milibackend.gfd.application.policy.IGfdPolicy;
 import br.com.mili.milibackend.gfd.domain.interfaces.IGfdManagerService;
 import br.com.mili.milibackend.gfd.domain.usecases.gfdFuncionario.*;
+import br.com.mili.milibackend.gfd.shared.roles.GfdPermissions;
 import br.com.mili.milibackend.shared.infra.security.model.CustomUserPrincipal;
+import br.com.mili.milibackend.shared.logoperation.LogOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
@@ -25,13 +27,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static br.com.mili.milibackend.shared.roles.GfdRolesConstants.*;
+import static br.com.mili.milibackend.gfd.shared.roles.GfdPermissions.Geral.*;
 
 
 @Slf4j
 @RestController
 @RequestMapping(GfdMFuncionarioController.ENDPOINT)
-@Tag(name = "GFD - Funcionário", description = "Rotas para manipulação de Funcionários")
+@Tag(name = "GFD - Colaborador", description = "Rotas para manipulação de Colaboradores")
 @RequiredArgsConstructor
 public class GfdMFuncionarioController {
     protected static final String ENDPOINT = "/mili-backend/v1/gfd";
@@ -45,12 +47,13 @@ public class GfdMFuncionarioController {
     private final ResendEmailAcademiaGfdFuncionarioUseCase resendEmailAcademiaGfdFuncionarioUseCase;
 
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-            "or hasAuthority('" + ROLE_FORNECEDOR + "')" +
-            "or hasAuthority('" + ROLE_SESMT + "')"
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + FORNECEDOR + "')" +
+            "or hasAuthority('" + SESMT + "')"
     )
     @PostMapping("funcionarios")
     @Transactional
+    @LogOperation
     @Operation(
             summary = "Cria um novo funcionário",
             description = "Retorna o funcionário criado, sendo que se o usuário for fornecedor, o funcionário criado será de seu usuário(empresa)"
@@ -59,7 +62,6 @@ public class GfdMFuncionarioController {
             @AuthenticationPrincipal CustomUserPrincipal user,
             @RequestBody @Valid GfdMFuncionarioCreateInputDto inputDto
     ) {
-        log.info("{} {} {}", RequestMethod.POST, ENDPOINT + "/funcionarios", user.getUsername());
 
         inputDto.setCodUsuario(user.getIdUser());
         inputDto.setAnalista(!gfdPolicy.isFornecedor(user));
@@ -68,12 +70,13 @@ public class GfdMFuncionarioController {
     }
 
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-            "or hasAuthority('" + ROLE_FORNECEDOR + "')" +
-            "or hasAuthority('" + ROLE_SESMT + "')"
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + FORNECEDOR + "')" +
+            "or hasAuthority('" + SESMT + "')"
     )
     @PutMapping("funcionarios/{id}")
     @Transactional
+    @LogOperation
     @Operation(
             summary = "Atualiza um funcionário",
             description = "Retorna o funcionário, sendo que se o usuário for fornecedor, o funcionário atualizado será de seu usuário(empresa)"
@@ -83,7 +86,6 @@ public class GfdMFuncionarioController {
             @PathVariable Integer id,
             @RequestBody @Valid GfdMFuncionarioUpdateInputDto inputDto
     ) {
-        log.info("{} {} {}", RequestMethod.PUT, ENDPOINT + "/funcionarios/" + id, user.getUsername());
 
         inputDto.setCodUsuario(user.getIdUser());
         inputDto.getFuncionario().setId(id);
@@ -92,23 +94,23 @@ public class GfdMFuncionarioController {
         return ResponseEntity.ok(gfdManagerService.updateFuncionario(inputDto));
     }
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-            "or hasAuthority('" + ROLE_FORNECEDOR + "')" +
-            "or hasAuthority('" + ROLE_VISUALIZACAO + "')" +
-            "or hasAuthority('" + ROLE_SESMT + "')"
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + FORNECEDOR + "')" +
+            "or hasAuthority('" + PORTARIA + "')" +
+            "or hasAuthority('" + FABRICA + "')" +
+            "or hasAuthority('" + SESMT + "')"
     )
     @GetMapping("funcionarios/{id}")
     @Operation(
             summary = "Retorna um funcionário",
             description = "Retorna o funcionário, sendo que se o usuário for fornecedor, sera retornado o funcionário de seu usuário(empresa)"
     )
+    @LogOperation
     public ResponseEntity<GfdMFuncionarioGetOutputDto> getFuncionario(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @PathVariable Integer id,
             @ParameterObject @ModelAttribute @Valid GfdMFuncionarioGetInputDto inputDto
     ) {
-        log.info("{} {} {}", RequestMethod.GET, ENDPOINT + "/funcionarios/" + id, user.getUsername());
-
         inputDto.setCodUsuario(user.getIdUser());
         inputDto.setAnalista(gfdPolicy.isAnalista(user));
         inputDto.getFuncionario().setId(id);
@@ -116,20 +118,21 @@ public class GfdMFuncionarioController {
         return ResponseEntity.ok(gfdManagerService.getFuncionario(inputDto));
     }
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') or hasAuthority('" + ROLE_FORNECEDOR + "')")
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + FORNECEDOR + "') "
+    )
     @DeleteMapping("funcionarios/{id}")
     @Transactional
     @Operation(
             summary = "Deleta um funcionário",
             description = "Não retorna nada, sendo que se o usuário for fornecedor, o funcionário deletado será de seu usuário(empresa)"
     )
+    @LogOperation
     public ResponseEntity<Void> deleteFuncionario(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @PathVariable Integer id,
             @ParameterObject @ModelAttribute @Valid GfdMFuncionarioDeleteInputDto inputDto
     ) {
-        log.info("{} {} {}", RequestMethod.DELETE, ENDPOINT + "/funcionarios/" + id, user.getUsername());
-
         inputDto.setCodUsuario(user.getIdUser());
         inputDto.setAnalista(gfdPolicy.isAnalista(user));
 
@@ -145,20 +148,19 @@ public class GfdMFuncionarioController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') or hasAuthority('" + ROLE_FORNECEDOR + "')")
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') or hasAuthority('" + FORNECEDOR + "')")
     @DeleteMapping("funcionarios/{id}/desligar")
     @Transactional
     @Operation(
             summary = "desativa um funcionário",
             description = "Não retorna nada, sendo que se o usuário for fornecedor, o funcionário desativado será de seu usuário(empresa)"
     )
+    @LogOperation
     public ResponseEntity<Void> desativateFuncionario(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @PathVariable Integer id,
             @ParameterObject @ModelAttribute @Valid GfdFuncionarioDesactivateInputDto inputDto
     ) {
-        log.info("{} {} {}", RequestMethod.DELETE, ENDPOINT + "/funcionarios/" + id + "/desligar", user.getUsername());
-
         inputDto.setCodUsuario(user.getIdUser());
         inputDto.setAnalista(gfdPolicy.isAnalista(user));
 
@@ -169,8 +171,8 @@ public class GfdMFuncionarioController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-            "or hasAuthority('" + ROLE_SESMT + "')"
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + SESMT + "')"
     )
     @PutMapping("funcionarios/{id}/observacao")
     @Transactional
@@ -179,19 +181,19 @@ public class GfdMFuncionarioController {
             description = "Retorna o funcionário. Faz a liberação do funcionário, caso o usuario tenha " +
                     "algum documento pendente a justificativa se torna obrigatório"
     )
+    @LogOperation
     public ResponseEntity<GfdFuncionarioUpdateObservacaoOutputDto> updateObservacao(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @PathVariable Integer id,
             @RequestBody @Valid GfdFuncionarioUpdateObservacaoInputDto inputDto
     ) {
-        log.info("{} {} {}", RequestMethod.PUT, ENDPOINT + "/funcionarios/" + id + "/observacao", user.getUsername());
         inputDto.setId(id);
 
         return ResponseEntity.ok(updateObservacaoFuncionarioUseCase.execute(inputDto));
     }
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-            "or hasAuthority('" + ROLE_SESMT + "')"
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + SESMT + "')"
     )
     @PutMapping("funcionarios/{id}/liberar")
     @Transactional
@@ -200,34 +202,34 @@ public class GfdMFuncionarioController {
             description = "Retorna o funcionário. Faz a liberação do funcionário, caso o usuario tenha " +
                     "algum documento pendente a justificativa se torna obrigatório"
     )
+    @LogOperation
     public ResponseEntity<GfdFuncionarioLiberarOutputDto> liberar(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @PathVariable Integer id,
             @RequestBody @Valid GfdFuncionarioLiberarInputDto inputDto
     ) {
-        log.info("{} {} {}", RequestMethod.PUT, ENDPOINT + "/funcionarios/" + id + "/liberar", user.getUsername());
         inputDto.setId(id);
         inputDto.setUsuario(user.getIdUser());
 
         return ResponseEntity.ok(updateLiberarFuncionarioUseCase.execute(inputDto));
     }
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-            "or hasAuthority('" + ROLE_FORNECEDOR + "')" +
-            "or hasAuthority('" + ROLE_VISUALIZACAO + "')" +
-            "or hasAuthority('" + ROLE_SESMT + "')"
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + FORNECEDOR + "')" +
+            "or hasAuthority('" + PORTARIA + "')" +
+            "or hasAuthority('" + FABRICA + "')" +
+            "or hasAuthority('" + SESMT + "')"
     )
     @GetMapping("funcionarios")
     @Operation(
             summary = "Retorna todos os funcionários",
             description = "Retorna todos os funcionários, sendo que se o usuário for fornecedor, sera retornado os funcionários de seu usuário(empresa)"
     )
+    @LogOperation
     public ResponseEntity<GfdMFuncionarioGetAllOutputDto> getAllFuncionario(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @ParameterObject @ModelAttribute @Valid GfdMFuncionarioGetAllInputDto inputDto
     ) {
-        log.info("{} {} {}", RequestMethod.GET, ENDPOINT + "/funcionarios", user.getUsername());
-
         inputDto.setCodUsuario(user.getIdUser());
 
         if (gfdPolicy.isFornecedor(user)) {
@@ -240,42 +242,39 @@ public class GfdMFuncionarioController {
     }
 
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "')")
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') "
+    )
     @GetMapping("funcionarios/{id}/liberacoes")
     @Operation(
-            summary = "Retorna o histótico de liberações do funcionário",
+            summary = "Retorna o histórico de liberações do funcionário",
             description = "Retornar o historico de liberações do funcionário, sendo so acessivel por analistas"
     )
+    @LogOperation
     public ResponseEntity<List<GfdFuncionarioLiberacaoGetAllOutputDto>> getAllLiberacoesFuncionario(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @PathVariable Integer id,
             @ParameterObject @ModelAttribute @Valid GfdFuncionarioLiberacaoGetAllInputDto inputDto
     ) {
-        log.info("{} {} {}", RequestMethod.GET, ENDPOINT + "/funcionarios/" + id + "/liberacoes", user.getUsername());
-
         inputDto.setFuncionarioId(id);
         return ResponseEntity.ok(getAllGfdFuncionarioLiberacaoUseCase.execute(inputDto));
     }
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-            "or hasAuthority('" + ROLE_FORNECEDOR + "')" +
-            "or hasAuthority('" + ROLE_VISUALIZACAO + "')" +
-            "or hasAuthority('" + ROLE_SESMT + "')"
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + FORNECEDOR + "')" +
+            "or hasAuthority('" + PORTARIA + "')" +
+            "or hasAuthority('" + SESMT + "')"
     )
     @GetMapping("funcionarios/{id}/academia/{academiaId}/resend")
     @Operation(
             summary = "Reenvia o email de integração",
             description = "Reenvia o email de integração, caso o usuário não tenha um email cadastrado, ele sera matriculado e sera feito o envio do email"
     )
+    @LogOperation
     public ResponseEntity<Void> academiaReenviarEmail(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @PathVariable Integer id,
             @PathVariable Integer academiaId
-            ) {
-
-
-        log.info("{} {}/{}", RequestMethod.GET, ENDPOINT + "/funcionarios/academia/resend", user.getUsername());
-
+    ) {
         resendEmailAcademiaGfdFuncionarioUseCase.execute(GfdFuncionarioResendEmailAcademiaInputDto.builder()
                 .idFuncionario(id)
                 .ctempCodigo(academiaId)

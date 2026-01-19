@@ -1,0 +1,13 @@
+package br.com.mili.milibackend.gfd.shared.roles;
+
+public interface GfdFuncionarioRole extends GfdRoleBase {
+    String CONSULTAR = PREFIX + "COLAB_VISUALIZAR";
+    String ALTERAR = PREFIX + "COLAB_ALTERAR";
+    String DESLIGAR = PREFIX + "COLAB_DESLIGAR";
+    String EXCLUIR = PREFIX + "COLAB_EXCLUIR";
+    String CRIAR = PREFIX + "COLAB_CRIAR";
+    String JUSTIFICAR_LIBERAR = PREFIX + "COLAB_JUSTIFICAR_LIBERAR";
+    String LIBERAR = PREFIX + "COLAB_LIBERAR";
+    String LIBERACAO_HISTORICO = PREFIX + "COLAB_LIBERACAO_HISTORICO";
+    String ACADEMIA_REENVIO_EMAIL = PREFIX + "COLAB_ACADEMIA_REENVIO_EMAIL";
+}
