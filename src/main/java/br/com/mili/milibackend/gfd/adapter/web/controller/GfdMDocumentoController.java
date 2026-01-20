@@ -15,6 +15,7 @@ import br.com.mili.milibackend.gfd.domain.usecases.gfdDocumento.GetAllSupplierDo
 import br.com.mili.milibackend.gfd.domain.usecases.gfdDocumento.UpdateStatusObservacaoDocumentoUseCase;
 import br.com.mili.milibackend.gfd.domain.usecases.gfdDocumento.UploadGfdDocumentoUseCase;
 import br.com.mili.milibackend.gfd.domain.usecases.gfdDocumento.gfdDocumentoHistorico.GetAllGfdDocumentoHistoricoUseCase;
+import br.com.mili.milibackend.gfd.shared.roles.GfdPermissions;
 import br.com.mili.milibackend.shared.infra.security.model.CustomUserPrincipal;
 import br.com.mili.milibackend.shared.logoperation.LogOperation;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,8 +33,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static br.com.mili.milibackend.shared.roles.GfdRolesConstants.*;
-
+import static br.com.mili.milibackend.gfd.shared.roles.GfdPermissions.Geral.*;
 
 @Slf4j
 @RestController
@@ -52,17 +52,18 @@ public class GfdMDocumentoController {
     private final RelatorioGfdDocumentoUseCase relatorioGfdDocumentoUseCase;
 
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-            "or hasAuthority('" + ROLE_FORNECEDOR + "')" +
-            "or hasAuthority('" + ROLE_VISUALIZACAO + "')" +
-            "or hasAuthority('" + ROLE_SESMT + "')"
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + FORNECEDOR + "')" +
+            "or hasAuthority('" + PORTARIA + "')" +
+            "or hasAuthority('" + FABRICA + "')" +
+            "or hasAuthority('" + SESMT + "')"
     )
+    @LogOperation
     @GetMapping("verificar-docs")
     public ResponseEntity<GfdMVerificarDocumentosOutputDto> verificarDocumentos(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @ParameterObject @ModelAttribute GfdMVerificarDocumentosInputDto inputDto
     ) {
-        log.info("{} {} {}", RequestMethod.GET, ENDPOINT + "/verificar-docs", user.getUsername());
 
         inputDto.setCodUsuario(user.getIdUser());
 
@@ -76,16 +77,16 @@ public class GfdMDocumentoController {
         return ResponseEntity.ok(getAllStatusGfdDocumentsUseCase.execute(inputDto));
     }
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-            "or hasAuthority('" + ROLE_FORNECEDOR + "') " +
-            "or hasAuthority('" + ROLE_SESMT + "')")
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + FORNECEDOR + "') " +
+            "or hasAuthority('" + SESMT + "')")
     @PostMapping("upload")
     @Transactional
+    @LogOperation
     public ResponseEntity<GfdMUploadDocumentoOutputDto> uploadDocumentos(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @RequestBody @Valid GfdMUploadDocumentoInputDto inputDto
     ) {
-        log.info("{} {} {}", RequestMethod.POST, ENDPOINT + "/upload", user.getUsername());
 
         if (gfdPolicy.isFornecedor(user)) {
             inputDto.setId(null);
@@ -100,17 +101,18 @@ public class GfdMDocumentoController {
         return ResponseEntity.ok(uploadGfdDocumentoUseCase.execute(inputDto));
     }
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-            "or hasAuthority('" + ROLE_FORNECEDOR + "')" +
-            "or hasAuthority('" + ROLE_VISUALIZACAO + "')" +
-            "or hasAuthority('" + ROLE_SESMT + "')"
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + FORNECEDOR + "')" +
+            "or hasAuthority('" + PORTARIA + "')" +
+            "or hasAuthority('" + FABRICA + "')" +
+            "or hasAuthority('" + SESMT + "')"
     )
+    @LogOperation
     @GetMapping("documentos")
     public ResponseEntity<GfdMDocumentosGetAllOutputDto> getAllDocumentos(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @ParameterObject @ModelAttribute @Valid GfdMDocumentosGetAllInputDto inputDto
     ) {
-        log.info("{} {} {}", RequestMethod.GET, ENDPOINT + "/documentos", user.getUsername());
         inputDto.setUsuario(user.getUsername());
         inputDto.setCodUsuario(user.getIdUser());
 
@@ -124,8 +126,8 @@ public class GfdMDocumentoController {
         return ResponseEntity.ok(getAllSupplierDocumentsUseCase.execute(inputDto));
     }
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-            "or hasAuthority('" + ROLE_SESMT + "')"
+/*    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + SESMT + "')"
     )
     @PutMapping("documentos/status-observacao")
     public ResponseEntity<GfdDocumentoUpdateStatusObservacaoOutputDto> updateStatusObservacaoDocumento(
@@ -135,16 +137,17 @@ public class GfdMDocumentoController {
         log.info("{} {} {}", RequestMethod.PUT, ENDPOINT + "/documentos/status-observacao", user.getUsername());
 
         return ResponseEntity.ok(updateStatusObservacaoDocumentoUseCase.execute(inputDto));
-    }
+    }*/
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "')" +
-            "or hasAuthority('" + ROLE_SESMT + "')")
+    @PreAuthorize("hasAuthority('" + ANALISTA + "')" +
+            "or hasAuthority('" + SESMT + "')"
+    )
+    @LogOperation
     @PutMapping("documentos")
     public ResponseEntity<GfdMDocumentoUpdateOutputDto> updateDocumento(
             @RequestBody @Valid GfdMDocumentoUpdateInputDto inputDto,
             @AuthenticationPrincipal CustomUserPrincipal user
     ) {
-        log.info("{} {} {}", RequestMethod.PUT, ENDPOINT + "/documentos", user.getUsername());
 
         inputDto.setCodUsuario(user.getIdUser());
 
@@ -157,17 +160,17 @@ public class GfdMDocumentoController {
         return ResponseEntity.ok(gfdManagerService.updateDocumento(inputDto));
     }
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-            "or hasAuthority('" + ROLE_FORNECEDOR + "')" +
-            "or hasAuthority('" + ROLE_SESMT + "')"
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + FORNECEDOR + "')" +
+            "or hasAuthority('" + SESMT + "')"
     )
+    @LogOperation
     @DeleteMapping("documentos/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable Integer id,
             @ParameterObject @ModelAttribute @Valid GfdMDocumentoDeleteInputDto inputDto,
             @AuthenticationPrincipal CustomUserPrincipal user
     ) {
-        log.info("{} {} {}", RequestMethod.DELETE, ENDPOINT + "/documentos/" + id, user.getUsername());
 
         inputDto.setId(id);
         inputDto.setCodUsuario(user.getIdUser());
@@ -185,17 +188,18 @@ public class GfdMDocumentoController {
     }
 
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-            "or hasAuthority('" + ROLE_FORNECEDOR + "')" +
-            "or hasAuthority('" + ROLE_SESMT + "')"
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + FORNECEDOR + "')" +
+            "or hasAuthority('" + FABRICA + "')" +
+            "or hasAuthority('" + SESMT + "')"
     )
+    @LogOperation
     @GetMapping("documentos/{id}/download")
     public ResponseEntity<GfdMDocumentoDownloadOutputDto> download(
             @PathVariable Integer id,
             @ParameterObject @ModelAttribute @Valid GfdMDocumentoDownloadInputDto inputDto,
             @AuthenticationPrincipal CustomUserPrincipal user
     ) {
-        log.info("{} {} {}", RequestMethod.GET, ENDPOINT + "/documentos/" + id + "/download", user.getUsername());
 
         inputDto.setId(id);
         inputDto.setCodUsuario(user.getIdUser());
@@ -211,10 +215,11 @@ public class GfdMDocumentoController {
     }
 
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-            "or hasAuthority('" + ROLE_FORNECEDOR + "')" +
-            "or hasAuthority('" + ROLE_VISUALIZACAO + "')" +
-            "or hasAuthority('" + ROLE_SESMT + "')"
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + FORNECEDOR + "')" +
+            "or hasAuthority('" + PORTARIA + "')" +
+            "or hasAuthority('" + FABRICA + "')" +
+            "or hasAuthority('" + SESMT + "')"
     )
     @GetMapping("documentos/{id}/historico")
     @Operation(
@@ -222,12 +227,12 @@ public class GfdMDocumentoController {
             description = "Retorna uma lista com o histórico das mudanças de status do documento, " +
                     "sendo possível visualizar tanto o fornecedor quanto o analista"
     )
+    @LogOperation
     public ResponseEntity<List<GfdDocumentoHistoricoGetAllOutputDto>> getHistorico(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @PathVariable("id") Integer idDocumento,
             @ParameterObject @ModelAttribute @Valid GfdDocumentoHistoricoGetAllInputDto inputDto
     ) {
-        log.info("{} {} {}", RequestMethod.GET, ENDPOINT + "/documentos/" + idDocumento + "/historico", user.getUsername());
 
         if (gfdPolicy.isAnalista(user)) {
             inputDto.setUsuarioId(null);
@@ -240,9 +245,10 @@ public class GfdMDocumentoController {
         return ResponseEntity.ok(getAllGfdDocumentoHistoricoUseCase.execute(inputDto));
     }
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-            "or hasAuthority('" + ROLE_VISUALIZACAO + "')" +
-            "or hasAuthority('" + ROLE_SESMT + "')"
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+            "or hasAuthority('" + PORTARIA + "')" +
+            "or hasAuthority('" + FABRICA + "')" +
+            "or hasAuthority('" + SESMT + "')"
     )
     @GetMapping("documentos/relatorio")
     @LogOperation

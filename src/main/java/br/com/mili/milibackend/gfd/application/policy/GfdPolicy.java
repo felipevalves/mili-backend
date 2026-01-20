@@ -7,17 +7,17 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static br.com.mili.milibackend.shared.roles.GfdRolesConstants.*;
+import static br.com.mili.milibackend.gfd.shared.roles.GfdPermissions.Geral.*;
 
 @Component
 public class GfdPolicy implements IGfdPolicy {
 
     public boolean isAnalista(CustomUserPrincipal user) {
-        return hasRole(user, ROLE_ANALISTA) || hasRole(user, ROLE_SESMT) || hasRole(user, ROLE_VISUALIZACAO);
+        return hasRole(user, ANALISTA) || hasRole(user, SESMT) || hasRole(user, PORTARIA) || hasRole(user, FABRICA);
     }
 
     public boolean isFornecedor(CustomUserPrincipal user) {
-        return hasRole(user, ROLE_FORNECEDOR);
+        return hasRole(user, FORNECEDOR);
     }
 
     private boolean hasRole(CustomUserPrincipal user, String role) {

@@ -3,7 +3,9 @@ package br.com.mili.milibackend.gfd.adapter.web.controller;
 import br.com.mili.milibackend.gfd.application.dto.tipoContratacao.GfdTipoContratacaoGetAllInputDto;
 import br.com.mili.milibackend.gfd.application.dto.tipoContratacao.GfdTipoContratacaoGetAllOutputDto;
 import br.com.mili.milibackend.gfd.domain.usecases.gfdTipoContratacao.GfdTipoContratacaoGetAllUseCase;
+import br.com.mili.milibackend.gfd.shared.roles.GfdPermissions;
 import br.com.mili.milibackend.shared.infra.security.model.CustomUserPrincipal;
+import br.com.mili.milibackend.shared.logoperation.LogOperation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static br.com.mili.milibackend.shared.roles.GfdRolesConstants.*;
+import static br.com.mili.milibackend.gfd.shared.roles.GfdPermissions.Geral.*;
 
 @Slf4j
 @RestController
@@ -27,17 +29,17 @@ public class GfdTipoContratacaoController {
 
     private final GfdTipoContratacaoGetAllUseCase gfdTipoContratacaoGetAllUseCase;
 
-    @PreAuthorize("hasAuthority('" + ROLE_ANALISTA + "') " +
-                  "or hasAuthority('" + ROLE_FORNECEDOR + "')" +
-                  "or hasAuthority('" + ROLE_VISUALIZACAO + "')" +
-                  "or hasAuthority('" + ROLE_SESMT + "')"
-    )
+    @PreAuthorize("hasAuthority('" + ANALISTA + "') " +
+                  "or hasAuthority('" + FORNECEDOR + "')" +
+                  "or hasAuthority('" + PORTARIA + "')" +
+                  "or hasAuthority('" + FABRICA + "')" +
+                  "or hasAuthority('" + SESMT + "')")
     @GetMapping
+    @LogOperation
     public ResponseEntity<List<GfdTipoContratacaoGetAllOutputDto>> getAll(
             @AuthenticationPrincipal CustomUserPrincipal user,
             @ParameterObject @ModelAttribute @Valid GfdTipoContratacaoGetAllInputDto inputDto
     ) {
-        log.info("{} {}/{}", RequestMethod.GET, ENDPOINT, user.getUsername());
         return ResponseEntity.ok(gfdTipoContratacaoGetAllUseCase.execute(inputDto));
     }
 }
