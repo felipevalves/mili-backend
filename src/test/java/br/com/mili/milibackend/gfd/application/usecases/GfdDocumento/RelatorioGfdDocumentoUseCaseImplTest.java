@@ -48,7 +48,7 @@ class RelatorioGfdDocumentoUseCaseImplTest {
         var sent = captor.getValue();
         assertNotNull(sent);
         assertNotNull(sent.getParamQuery());
-        assertEquals(" AND CTFOR_CODIGO = 321 AND ID_FUNCIONARIO = 99 AND PERIODO_INICIAL >= TO_DATE('2025-09-01', 'YYYY-MM-DD')", sent.getParamQuery());
+        assertEquals(" AND CTFOR_CODIGO = 321 AND ID_FUNCIONARIO = 99 AND TO_DATE('2025-09-01', 'YYYY-MM-DD') BETWEEN  PERIODO_INICIAL AND PERIODO_FINAL", sent.getParamQuery());
     }
 
     @Test
@@ -70,6 +70,6 @@ class RelatorioGfdDocumentoUseCaseImplTest {
         var sent = captor.getValue();
         assertNotNull(sent);
         assertNotNull(sent.getParamQuery());
-        assertEquals(" AND PERIODO_INICIAL >= TO_DATE('2025-09-01', 'YYYY-MM-DD')", sent.getParamQuery());
+        assertEquals(" AND TO_DATE('2025-09-01', 'YYYY-MM-DD') BETWEEN  PERIODO_INICIAL AND PERIODO_FINAL", sent.getParamQuery());
     }
 }
