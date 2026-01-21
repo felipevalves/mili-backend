@@ -78,6 +78,8 @@ public class LogAspect {
             boolean isModelAttribute = hasAnnotation(annotations, ModelAttribute.class);
             boolean isRequestPart = hasAnnotation(annotations, RequestPart.class);
 
+            if(arg == null) continue;
+
             boolean probablyPojo = !isSimpleType(arg.getClass());
 
             String serialized;
