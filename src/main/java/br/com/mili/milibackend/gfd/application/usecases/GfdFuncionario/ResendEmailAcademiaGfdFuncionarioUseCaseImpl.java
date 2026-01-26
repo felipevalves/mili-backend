@@ -56,6 +56,10 @@ public class ResendEmailAcademiaGfdFuncionarioUseCaseImpl implements ResendEmail
             courseFound = getCoursesByUserUseCase.getCourseByUser(userAcademia.getId(), courseEnum.getIdCourse());
         }
 
+        var locaisTrabalho = funcionario.getLocaisTrabalho().stream().filter( localTrabalho -> courseEnum.getCtempCodigo() == (localTrabalho.getCtempCodigo())).toList();
+
+        funcionario.setLocaisTrabalho(locaisTrabalho);
+
         // ja retorna porque ja é feito o envio da matricula do usuário
         if (courseFound == null) {
             matricular(funcionario);
