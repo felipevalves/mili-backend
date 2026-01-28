@@ -224,7 +224,7 @@ public interface GfdFuncionarioRepository extends JpaRepository<GfdFuncionario, 
     @Modifying
     @Query(value = """
     BEGIN
-        PKG_GFD_EXPIRACAO.GFD_PROCESSAR_EXPIRACAO(FALSE, :idFuncionario);
+        PKG_GFD_EXPIRACAO.GFD_PROCESSAR_EXPIRACAO(:idFuncionario);
     END;
 """, nativeQuery = true)
     void executeProcedureLiberacao(Integer idFuncionario);
