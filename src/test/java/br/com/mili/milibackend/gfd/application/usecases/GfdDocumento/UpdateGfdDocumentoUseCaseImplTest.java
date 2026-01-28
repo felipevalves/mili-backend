@@ -75,7 +75,7 @@ class UpdateGfdDocumentoUseCaseImplTest {
                 .periodo(LocalDate.now())
                 .build();
     }
-/* todo: ativar posteriormente com nova procedure
+
     @Test
     void deve_liberar_funcionario_quando_documentos_sem_pendencias() {
         // arrange
@@ -94,7 +94,7 @@ class UpdateGfdDocumentoUseCaseImplTest {
 
         // assert: sem pendencias => libera funcionario (1)
         verify(gfdFuncionarioRepository).executeProcedureLiberacao(funcionarioId);
-    }*/
+    }
 
 /*    @Test
     void deve_bloquear_fornecedor_quando_documentos_pendentes() {
