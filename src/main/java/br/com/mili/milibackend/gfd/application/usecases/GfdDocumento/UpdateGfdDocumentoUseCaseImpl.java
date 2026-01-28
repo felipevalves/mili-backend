@@ -85,7 +85,7 @@ public class UpdateGfdDocumentoUseCaseImpl implements UpdateGfdDocumentoUseCase 
         // os documentos da empresa também precisam estar em conforme
         // se tudo tiver conforme automaticamente atualiza o liberado do funcionario
         if (funcionarioId != null && !isFuncionarioDesligado) {
-            gfdFuncionarioRepository.executeProcedureLiberacao(funcionarioId);
+       //todo: ativar posteriormente com nova procedure     gfdFuncionarioRepository.executeProcedureLiberacao(funcionarioId);
         }
     }
 
